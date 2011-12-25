@@ -9,7 +9,8 @@ start() ->
 game_loop(Board) ->
   redraw_world(Board),
   case key_bindings(cecho:getch()) of
-    quit -> teardown_curses();
+    unknown -> game_loop(Board);
+    quit    -> teardown_curses();
     MoveDirection ->
       game_loop(board:move_player(Board, MoveDirection))
   end.
@@ -18,7 +19,8 @@ key_bindings($) -> quit;
 key_bindings($k)  -> north;
 key_bindings($j)  -> south;
 key_bindings($h)  -> west;
-key_bindings($l)  -> east.
+key_bindings($l)  -> east;
+key_bindings(_)   -> unknown.
 
 setup_curses() ->
   application:start(cecho),
