@@ -15,9 +15,6 @@ player(#board{player=Player}) -> Player.
 
 npcs(#board{npcs=NPCs}) -> NPCs.
 
-new(Player, NPCs) ->
-  #board{player = Player, npcs = NPCs}.
-
 move_player(Board=#board{player={X, Y}}, Direction) ->
   NewPosition = {move_x(X, Direction),
                  move_y(Y, Direction)},
@@ -44,11 +41,11 @@ colision(NewPosition, _NPCs=[_ | Tail], Board) ->
 % Tests
 
 move_player_test() ->
-  NPCs = [{2, 2, $T}],
-  #board{player = {1, 0}, npcs = NPCs} = move_player(new({1, 1}, NPCs), north),
-  #board{player = {1, 2}, npcs = NPCs} = move_player(new({1, 1}, NPCs), south),
-  #board{player = {0, 1}, npcs = NPCs} = move_player(new({1, 1}, NPCs), west),
-  #board{player = {2, 1}, npcs = NPCs} = move_player(new({1, 1}, NPCs), east).
+  Board0  = new_game(),
+  Board1 = #board{player = {0, 1}} = move_player(Board0, south),
+  Board2 = #board{player = {1, 1}} = move_player(Board1, east),
+  Board3 = #board{player = {1, 0}} = move_player(Board2, north),
+           #board{player = {0, 0}} = move_player(Board3, west).
 
 move_x_test() ->
   1 = move_x(2, west),
