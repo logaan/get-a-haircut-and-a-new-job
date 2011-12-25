@@ -5,34 +5,60 @@
 
 start() ->
   setup_curses(),
-  game_loop({0, 0}, [{2, 0, "D"},
-                     {2, 2, "B"},
-                     {2, 4, "H"},
-                     {2, 6, "G"},
-                     {2, 8, "M"}]).
+  game_loop({{0, 0}, [{2, 0, "D"},
+                      {2, 2, "B"},
+                      {2, 4, "H"},
+                      {2, 6, "G"},
+                      {2, 8, "M"}]}).
 
-game_loop(Position, NPCs) ->
-  redraw_world(Position, NPCs),
+% TODO: Turn world into a record
+game_loop(World) ->
+  redraw_world(World),
   case cecho:getch() of
     $ -> teardown_curses();
-    $k -> game_loop(move_up(Position), NPCs);
-    $j -> game_loop(move_down(Position), NPCs);
-    $h -> game_loop(move_left(Position), NPCs);
-    $l -> game_loop(move_right(Position), NPCs);
-    _ -> game_loop(Position, NPCs)
+    $k -> game_loop(move_up(World));
+    $j -> game_loop(move_down(World));
+    $h -> game_loop(move_left(World));
+    $l -> game_loop(move_right(World));
+    _ -> game_loop(World)
   end.
 
-move_up({X, Y}) when Y > 0 -> {X, Y-1};
-move_up(Position) -> Position.
+% TODO: Fix repetition
+move_up({OldPosition = {X, Y}, NPCs}) when Y > 0 ->
+  NewPosition = {X, Y-1},
+  case colision(NewPosition, NPCs) of
+    true -> {OldPosition, NPCs};
+    false -> {NewPosition, NPCs}
+  end;
+move_up(World) -> World.
 
-move_down({X, Y}) when Y < 23 -> {X, Y+1};
-move_down(Position) -> Position.
+move_down({OldPosition = {X, Y}, NPCs}) when Y < 23 ->
+  NewPosition = {X, Y+1},
+  case colision(NewPosition, NPCs) of
+    true -> {OldPosition, NPCs};
+    false -> {NewPosition, NPCs}
+  end;
+move_left(World) -> World.
 
-move_left({X, Y}) when X > 0 -> {X-1, Y};
-move_left(Position) -> Position.
+move_left({OldPosition = {X, Y}, NPCs}) when X > 0 -> 
+  NewPosition = {X-1, Y},
+  case colision(NewPosition, NPCs) of
+    true -> {OldPosition, NPCs};
+    false -> {NewPosition, NPCs}
+  end;
+move_left(World) -> World.
 
-move_right({X, Y}) when X < 79 -> {X+1, Y};
-move_right(Position) -> Position.
+move_right({OldPosition = {X, Y}, NPCs}) when X < 79 ->
+  NewPosition = {X+1, Y},
+  case colision(NewPosition, NPCs) of
+    true -> {OldPosition, NPCs};
+    false -> {NewPosition, NPCs}
+  end;
+move_right(World) -> World.
+
+colision(_, []) -> false;
+colision({X, Y}, [{X, Y, _} | _]) -> true;
+colision(Player, [_ | NPCs]) -> colision(Player, NPCs).
 
 % IOey things. yuck.
 
@@ -46,7 +72,7 @@ teardown_curses() ->
   application:stop(cecho),
   erlang:halt().
 
-redraw_world(Player, NPCs) ->
+redraw_world({Player, NPCs}) ->
   cecho:erase(),
   draw_npcs(NPCs),
   draw_player(Player),
