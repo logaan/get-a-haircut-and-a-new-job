@@ -4,4 +4,6 @@ start:
 compile:
 	erlc interface.erl
 	erlc plot_state_machine.erl
-
+clean:
+	rm *.dump
+	rm *.beam

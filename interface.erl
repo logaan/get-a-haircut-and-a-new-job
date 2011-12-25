@@ -5,41 +5,18 @@
 
 start() ->
   setup_curses(),
+  handle_input({0, 0}).
 
-  StartingPosition = {0, 0},
-  print_string(StartingPosition, "@"),
-  cecho:refresh(),
-
-  handle_input(StartingPosition).
-
-setup_curses() ->
-  application:start(cecho),
-  cecho:cbreak(),
-  cecho:noecho(),
-  cecho:curs_set(?ceCURS_INVISIBLE).
-
-teardown_curses() ->
-  application:stop(cecho),
-  erlang:halt().
-
-handle_input(OldPosition) ->
+handle_input(Position) ->
+  redraw_world(Position),
   case cecho:getch() of
-    $k -> redraw_player(OldPosition, move_up(OldPosition));
-    $j -> redraw_player(OldPosition, move_down(OldPosition));
-    $h -> redraw_player(OldPosition, move_left(OldPosition));
-    $l -> redraw_player(OldPosition, move_right(OldPosition));
+    $k -> handle_input(move_up(Position));
+    $j -> handle_input(move_down(Position));
+    $h -> handle_input(move_left(Position));
+    $l -> handle_input(move_right(Position));
     $ -> teardown_curses();
-    _ -> handle_input(OldPosition)
+    _ -> handle_input(Position)
   end.
-
-redraw_player(OldPosition, NewPosition) ->
-  print_string(OldPosition, " "),
-  print_string(NewPosition, "@"),
-  cecho:refresh(),
-  handle_input(NewPosition).
-
-print_string({X, Y}, String) ->
-  cecho:mvaddstr(Y, X, String).
 
 move_up({X, Y}) when Y > 0 -> {X, Y-1};
 move_up(Position) -> Position.
@@ -52,4 +29,21 @@ move_left(Position) -> Position.
 
 move_right({X, Y}) when X < 79 -> {X+1, Y};
 move_right(Position) -> Position.
+
+% IOey things. yuck.
+
+setup_curses() ->
+  application:start(cecho),
+  cecho:cbreak(),
+  cecho:noecho(),
+  cecho:curs_set(?ceCURS_INVISIBLE).
+
+teardown_curses() ->
+  application:stop(cecho),
+  erlang:halt().
+
+redraw_world({X, Y}) ->
+  cecho:erase(),
+  cecho:mvaddstr(Y, X, "@"),
+  cecho:refresh().
 
