@@ -52,7 +52,7 @@ draw_npcs([{X, Y, Char} | NPCs]) ->
 
 move_player({OldPosition = {X, Y}, NPCs}, Direction) ->
   NewPosition = {move_x(X, Direction), move_y(Y, Direction)},
-  {colision(OldPosition, NewPosition, NPCs), NPCs}.
+  colision(OldPosition, NewPosition, NPCs).
 
 move_y(Y, ?north) when Y > 0  -> Y - 1;
 move_y(Y, ?south) when Y < 23 -> Y + 1;
@@ -62,12 +62,14 @@ move_x(X, ?west) when X > 0  -> X - 1;
 move_x(X, ?east) when X < 79 -> X + 1;
 move_x(X, _) -> X.
 
-colision(_OldPosition, NewPosition, []) ->
-  NewPosition;
-colision(OldPosition, {X, Y}, [{X, Y, _} | _NPCs]) ->
-  OldPosition;
-colision(OldPosition, NewPosition, [_ | NPCs]) ->
-  colision(OldPosition, NewPosition, NPCs).
+colision(OldPosition, NewPosition, NPCs) ->
+  colision(OldPosition, NewPosition, NPCs, NPCs).
+colision(_OldPosition, NewPosition, NPCs, []) ->
+  {NewPosition, NPCs};
+colision(OldPosition, {X, Y}, NPCs, [{X, Y, _} | _NPCs]) ->
+  {OldPosition, NPCs};
+colision(OldPosition, NewPosition, NPCs, [_Head | Tail]) ->
+  colision(OldPosition, NewPosition, NPCs, Tail).
 
 % Tests
 
