@@ -21,7 +21,7 @@ game_loop(World) ->
   redraw_world(World),
   case cecho:getch() of
     ?quit -> teardown_curses();
-    Direction -> game_loop(move(World, Direction))
+    Direction -> game_loop(move_player(World, Direction))
   end.
 
 setup_curses() ->
@@ -50,7 +50,7 @@ draw_npcs([{X, Y, Char} | NPCs]) ->
 
 % Utilities
 
-move({OldPosition = {X, Y}, NPCs}, Direction) ->
+move_player({OldPosition = {X, Y}, NPCs}, Direction) ->
   NewPosition = {move_x(X, Direction), move_y(Y, Direction)},
   {colision(OldPosition, NewPosition, NPCs), NPCs}.
 
@@ -71,12 +71,12 @@ colision(OldPosition, NewPosition, [_ | NPCs]) ->
 
 % Tests
 
-move_test() ->
+move_player_test() ->
   NPCs = [{2, 2, $T}],
-  {{1, 0}, NPCs} = move({{1, 1}, NPCs}, ?north),
-  {{1, 2}, NPCs} = move({{1, 1}, NPCs}, ?south),
-  {{0, 1}, NPCs} = move({{1, 1}, NPCs}, ?west),
-  {{2, 1}, NPCs} = move({{1, 1}, NPCs}, ?east).
+  {{1, 0}, NPCs} = move_player({{1, 1}, NPCs}, ?north),
+  {{1, 2}, NPCs} = move_player({{1, 1}, NPCs}, ?south),
+  {{0, 1}, NPCs} = move_player({{1, 1}, NPCs}, ?west),
+  {{2, 1}, NPCs} = move_player({{1, 1}, NPCs}, ?east).
 
 move_x_test() ->
   1 = move_x(2, ?west),
