@@ -5,17 +5,21 @@
 
 start() ->
   setup_curses(),
-  handle_input({0, 0}).
+  game_loop({0, 0}, [{2, 0, "D"},
+                     {2, 2, "B"},
+                     {2, 4, "H"},
+                     {2, 6, "G"},
+                     {2, 8, "M"}]).
 
-handle_input(Position) ->
-  redraw_world(Position),
+game_loop(Position, NPCs) ->
+  redraw_world(Position, NPCs),
   case cecho:getch() of
-    $k -> handle_input(move_up(Position));
-    $j -> handle_input(move_down(Position));
-    $h -> handle_input(move_left(Position));
-    $l -> handle_input(move_right(Position));
     $ -> teardown_curses();
-    _ -> handle_input(Position)
+    $k -> game_loop(move_up(Position), NPCs);
+    $j -> game_loop(move_down(Position), NPCs);
+    $h -> game_loop(move_left(Position), NPCs);
+    $l -> game_loop(move_right(Position), NPCs);
+    _ -> game_loop(Position, NPCs)
   end.
 
 move_up({X, Y}) when Y > 0 -> {X, Y-1};
@@ -42,8 +46,17 @@ teardown_curses() ->
   application:stop(cecho),
   erlang:halt().
 
-redraw_world({X, Y}) ->
+redraw_world(Player, NPCs) ->
   cecho:erase(),
-  cecho:mvaddstr(Y, X, "@"),
+  draw_npcs(NPCs),
+  draw_player(Player),
   cecho:refresh().
+
+draw_player({X, Y}) ->
+  cecho:mvaddstr(Y, X, "@").
+
+draw_npcs([]) -> ok;
+draw_npcs([{X, Y, Char} | NPCs]) ->
+  cecho:mvaddstr(Y, X, Char),
+  draw_npcs(NPCs).
 
