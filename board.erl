@@ -1,19 +1,23 @@
 -module(board).
--export([new_game/0, player/1, npcs/1, move_player/2]).
+-export([new_game/0, player/1, npcs/1, message/1, move_player/2]).
 -include_lib("eunit/include/eunit.hrl").
--record(board, {state, player, npcs}).
+-record(board, {state, player, npcs, message}).
 
 % Utilities
 % TODO: Hook up colision so that it triggers plot event
 new_game() ->
   #board{ state  = start,
           player = {0, 0},
-          npcs   = [{2, 0, "D"}, {2, 2, "B"}, {2, 4, "H"},
-                    {2, 6, "G"}, {2, 8, "M"}]}.
+          npcs   = [{2, 0, $D}, {2, 2, $B}, {2, 4, $H},
+                    {2, 6, $G}, {2, 8, $M}],
+          message = ""}.
 
 player(#board{player=Player}) -> Player.
 
 npcs(#board{npcs=NPCs}) -> NPCs.
+
+message(#board{state=State, message=Message}) ->
+  Message ++ ". (" ++ atom_to_list(State) ++ ")".
 
 move_player(Board=#board{player={X, Y}}, Direction) ->
   NewPosition = {move_x(X, Direction),
@@ -32,9 +36,10 @@ colision(NewPosition, Board=#board{npcs=NPCs}) ->
   colision(NewPosition, NPCs, Board).
 
 colision(NewPosition, _NPCS=[], Board) ->
-  Board#board{player = NewPosition};
-colision(_NewPosition={X, Y}, _NPCs=[{X, Y, _} | _], Board) ->
-  Board;
+  Board#board{player = NewPosition, message = ""};
+colision({X, Y}, [{X, Y, Char} | _], Board=#board{state=State, npcs=NPCs}) ->
+  {NewState, Message, NewNPCs} = plot_state_machine:advance_plot(State, Char, NPCs),
+  Board#board{ state=NewState, npcs= NewNPCs, message = Message };
 colision(NewPosition, _NPCs=[_ | Tail], Board) ->
   colision(NewPosition, Tail, Board).
 

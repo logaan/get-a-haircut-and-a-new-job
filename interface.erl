@@ -11,8 +11,7 @@ game_loop(Board) ->
   case key_bindings(cecho:getch()) of
     unknown -> game_loop(Board);
     quit    -> teardown_curses();
-    MoveDirection ->
-      game_loop(board:move_player(Board, MoveDirection))
+    MoveDirection -> game_loop(board:move_player(Board, MoveDirection))
   end.
 
 key_bindings($) -> quit;
@@ -36,6 +35,7 @@ redraw_world(Board) ->
   cecho:erase(),
   draw_npcs(board:npcs(Board)),
   draw_player(board:player(Board)),
+  draw_message(board:message(Board)),
   cecho:refresh().
 
 draw_player({X, Y}) ->
@@ -43,6 +43,9 @@ draw_player({X, Y}) ->
 
 draw_npcs([]) -> ok;
 draw_npcs([{X, Y, Char} | NPCs]) ->
-  cecho:mvaddstr(Y, X, Char),
+  cecho:mvaddstr(Y, X, [Char]),
   draw_npcs(NPCs).
+
+draw_message(Message) ->
+  cecho:mvaddstr(23, 0, Message).
 
