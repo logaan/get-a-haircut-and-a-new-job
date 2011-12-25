@@ -16,45 +16,23 @@ game_loop(World) ->
   redraw_world(World),
   case cecho:getch() of
     $ -> teardown_curses();
-    $k -> game_loop(move_up(World));
-    $j -> game_loop(move_down(World));
-    $h -> game_loop(move_left(World));
-    $l -> game_loop(move_right(World));
-    _ -> game_loop(World)
+    Direction -> game_loop(move(World, Direction))
   end.
 
-% TODO: Fix repetition
-move_up({OldPosition = {X, Y}, NPCs}) when Y > 0 ->
-  NewPosition = {X, Y-1},
+move({OldPosition = {X, Y}, NPCs}, Direction) ->
+  NewPosition = {move_x(X, Direction), move_y(Y, Direction)},
   case colision(NewPosition, NPCs) of
     true -> {OldPosition, NPCs};
     false -> {NewPosition, NPCs}
-  end;
-move_up(World) -> World.
+  end.
 
-move_down({OldPosition = {X, Y}, NPCs}) when Y < 23 ->
-  NewPosition = {X, Y+1},
-  case colision(NewPosition, NPCs) of
-    true -> {OldPosition, NPCs};
-    false -> {NewPosition, NPCs}
-  end;
-move_left(World) -> World.
+move_y(Y, $k) when Y > 0  -> Y - 1;
+move_y(Y, $j) when Y < 23 -> Y + 1;
+move_y(Y, _) -> Y.
 
-move_left({OldPosition = {X, Y}, NPCs}) when X > 0 -> 
-  NewPosition = {X-1, Y},
-  case colision(NewPosition, NPCs) of
-    true -> {OldPosition, NPCs};
-    false -> {NewPosition, NPCs}
-  end;
-move_left(World) -> World.
-
-move_right({OldPosition = {X, Y}, NPCs}) when X < 79 ->
-  NewPosition = {X+1, Y},
-  case colision(NewPosition, NPCs) of
-    true -> {OldPosition, NPCs};
-    false -> {NewPosition, NPCs}
-  end;
-move_right(World) -> World.
+move_x(X, $h) when X > 0  -> X - 1;
+move_x(X, $l) when X < 79 -> X + 1;
+move_x(X, _) -> X.
 
 colision(_, []) -> false;
 colision({X, Y}, [{X, Y, _} | _]) -> true;
