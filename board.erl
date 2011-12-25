@@ -1,16 +1,15 @@
 -module(board).
 -export([new_game/0, player/1, npcs/1, move_player/2]).
 -include_lib("eunit/include/eunit.hrl").
--record(board, {player, npcs}).
+-record(board, {state, player, npcs}).
 
 % Utilities
-% TODO: Add game state to board
 % TODO: Hook up colision so that it triggers plot event
 new_game() ->
-  #board{
-    player = {0, 0},
-    npcs   = [{2, 0, "D"}, {2, 2, "B"}, {2, 4, "H"},
-              {2, 6, "G"}, {2, 8, "M"}]}.
+  #board{ state  = start,
+          player = {0, 0},
+          npcs   = [{2, 0, "D"}, {2, 2, "B"}, {2, 4, "H"},
+                    {2, 6, "G"}, {2, 8, "M"}]}.
 
 player(#board{player=Player}) -> Player.
 
@@ -19,9 +18,10 @@ npcs(#board{npcs=NPCs}) -> NPCs.
 new(Player, NPCs) ->
   #board{player = Player, npcs = NPCs}.
 
-move_player(#board{player=OldPosition = {X, Y}, npcs=NPCs}, Direction) ->
-  NewPosition = {move_x(X, Direction), move_y(Y, Direction)},
-  colision(OldPosition, NewPosition, NPCs).
+move_player(Board=#board{player={X, Y}}, Direction) ->
+  NewPosition = {move_x(X, Direction),
+                 move_y(Y, Direction)},
+  colision(NewPosition, Board).
 
 move_y(Y, north) when Y > 0  -> Y - 1;
 move_y(Y, south) when Y < 23 -> Y + 1;
@@ -31,14 +31,15 @@ move_x(X, west) when X > 0  -> X - 1;
 move_x(X, east) when X < 79 -> X + 1;
 move_x(X, _) -> X.
 
-colision(OldPosition, NewPosition, NPCs) ->
-  colision(OldPosition, NewPosition, NPCs, NPCs).
-colision(_OldPosition, NewPosition, NPCs, []) ->
-  #board{player = NewPosition, npcs = NPCs};
-colision(OldPosition, {X, Y}, NPCs, [{X, Y, _} | _NPCs]) ->
-  #board{player = OldPosition, npcs = NPCs};
-colision(OldPosition, NewPosition, NPCs, [_Head | Tail]) ->
-  colision(OldPosition, NewPosition, NPCs, Tail).
+colision(NewPosition, Board=#board{npcs=NPCs}) ->
+  colision(NewPosition, NPCs, Board).
+
+colision(NewPosition, _NPCS=[], Board) ->
+  Board#board{player = NewPosition};
+colision(_NewPosition={X, Y}, _NPCs=[{X, Y, _} | _], Board) ->
+  Board;
+colision(NewPosition, _NPCs=[_ | Tail], Board) ->
+  colision(NewPosition, Tail, Board).
 
 % Tests
 
