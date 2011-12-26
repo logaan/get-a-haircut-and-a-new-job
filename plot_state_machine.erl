@@ -23,7 +23,7 @@ speak(start, $D) -> {got_cash, "You're out? Aight. Here's yo lettuice"};
 speak(start, $M) -> {start, "You worthless piece of shit. Get out of here"};
 speak(start, $G) -> {start, "That Tyrone is lookin' pretty fly wit his new do"};
 speak(start, $B) -> {two_jobs, "You can start monday"};
-speak(start, $H) -> {pestered_hairdresser, "This aint no charity bitch"};
+speak(start, $H) -> {pissed_hairdresser, "This aint no charity bitch"};
 
 speak(two_jobs, $D) -> {lost, "I don't think you're taking this seriously *bang*"};
 speak(two_jobs, $M) -> {two_jobs, "Glad to hear that"};
