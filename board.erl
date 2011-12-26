@@ -16,8 +16,8 @@ player(#board{player=Player}) -> Player.
 
 npcs(#board{npcs=NPCs}) -> NPCs.
 
-message(#board{state=State, message=Message}) ->
-  Message ++ ". (" ++ atom_to_list(State) ++ ")".
+message(#board{message=Message}) ->
+  Message.
 
 move_player(Board=#board{player={X, Y}}, Direction) ->
   NewPosition = {move_x(X, Direction),
@@ -38,7 +38,7 @@ colision(NewPosition, Board=#board{npcs=NPCs}) ->
 colision(NewPosition, _NPCS=[], Board) ->
   Board#board{player = NewPosition, message = ""};
 colision({X, Y}, [{X, Y, Char} | _], Board=#board{state=State, npcs=NPCs}) ->
-  {NewState, Message, NewNPCs} = plot_state_machine:advance_plot(State, Char, NPCs),
+  {NewState, Message, NewNPCs} = plot:advance(State, Char, NPCs),
   Board#board{ state=NewState, npcs= NewNPCs, message = Message };
 colision(NewPosition, _NPCs=[_ | Tail], Board) ->
   colision(NewPosition, Tail, Board).

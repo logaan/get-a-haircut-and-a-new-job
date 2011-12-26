@@ -6,7 +6,7 @@ repl:
 compile:
 	erlc interface.erl
 	erlc board.erl
-	erlc plot_state_machine.erl
+	erlc plot.erl
 clean:
 	rm *.dump
 	rm *.beam
