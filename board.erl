@@ -5,9 +5,9 @@
 
 new_game() ->
   #board{ state  = start,
-          player = {0, 0},
-          npcs   = [{2, 0, $D}, {2, 2, $B}, {2, 4, $H},
-                    {2, 6, $G}, {2, 8, $M}],
+          player = {6, 3},
+          npcs   = [{30, 11, $D}, {75, 11, $B}, {52, 6, $H},
+                    {48, 13, $G}, {6, 12, $M}],
           message = ""}.
 
 state(#board{state=State}) -> State.

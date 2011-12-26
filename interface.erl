@@ -11,7 +11,9 @@ draw_world(Board) ->
   case board:state(Board) of
     won  -> draw_win();
     lost -> draw_loss();
-    _    -> draw_npcs(board:npcs(Board)),
+    _    -> draw_walls(),
+            draw_coords(board:player(Board)),
+            draw_npcs(board:npcs(Board)),
             draw_player(board:player(Board))
   end,
   draw_message(board:message(Board)),
@@ -25,12 +27,21 @@ game_loop(Board) ->
     MoveDirection -> draw_world(board:move_player(Board, MoveDirection))
   end.
 
+% Utilities
+
 key_bindings($) -> quit;
 key_bindings($k)  -> north;
 key_bindings($j)  -> south;
 key_bindings($h)  -> west;
 key_bindings($l)  -> east;
 key_bindings(_)   -> unknown.
+
+check_game_end(Board)    -> check_game_end(board:state(Board), Board).
+check_game_end(won,  _)  -> close_on_confirm();
+check_game_end(lost, _)  -> close_on_confirm();
+check_game_end(_, Board) -> game_loop(Board).
+
+% Setup/teardown
 
 setup_curses() ->
   application:start(cecho),
@@ -46,6 +57,12 @@ close_on_confirm() ->
   cecho:getch(),
   teardown_curses().
 
+% Drawings things
+
+draw_walls() ->
+  {ok, Walls} = file:read_file("walls.txt"),
+  cecho:mvaddstr(0, 0, binary_to_list(Walls)).
+
 draw_player({X, Y}) ->
   cecho:mvaddstr(Y, X, "@").
 
@@ -55,7 +72,7 @@ draw_npcs([{X, Y, Char} | NPCs]) ->
   draw_npcs(NPCs).
 
 draw_message(Message) ->
-  cecho:mvaddstr(23, 0, Message).
+  cecho:mvaddstr(22, 1, Message).
 
 draw_win() ->
   cecho:mvaddstr(11, 33, "You won the game").
@@ -63,8 +80,7 @@ draw_win() ->
 draw_loss() ->
   cecho:mvaddstr(11, 32, "You lost the game").
 
-check_game_end(Board)    -> check_game_end(board:state(Board), Board).
-check_game_end(won,  _)  -> close_on_confirm();
-check_game_end(lost, _)  -> close_on_confirm();
-check_game_end(_, Board) -> game_loop(Board).
+draw_coords({X, Y}) ->
+  CoOrds = [integer_to_list(X), integer_to_list(Y)],
+  cecho:mvaddstr(22, 74, string:join(CoOrds, " ")).
 
