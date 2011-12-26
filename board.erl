@@ -1,16 +1,16 @@
 -module(board).
--export([new_game/0, player/1, npcs/1, message/1, move_player/2]).
+-export([new_game/0, state/1, player/1, npcs/1, message/1, move_player/2]).
 -include_lib("eunit/include/eunit.hrl").
 -record(board, {state, player, npcs, message}).
 
-% Utilities
-% TODO: Hook up colision so that it triggers plot event
 new_game() ->
   #board{ state  = start,
           player = {0, 0},
           npcs   = [{2, 0, $D}, {2, 2, $B}, {2, 4, $H},
                     {2, 6, $G}, {2, 8, $M}],
           message = ""}.
+
+state(#board{state=State}) -> State.
 
 player(#board{player=Player}) -> Player.
 

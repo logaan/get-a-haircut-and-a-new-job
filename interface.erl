@@ -4,14 +4,25 @@
 
 start() ->
   setup_curses(),
-  game_loop(board:new_game()).
+  draw_world(board:new_game()).
+
+draw_world(Board) ->
+  cecho:erase(),
+  case board:state(Board) of
+    won  -> draw_win();
+    lost -> draw_loss();
+    _    -> draw_npcs(board:npcs(Board)),
+            draw_player(board:player(Board))
+  end,
+  draw_message(board:message(Board)),
+  cecho:refresh(),
+  check_game_end(Board).
 
 game_loop(Board) ->
-  redraw_world(Board),
   case key_bindings(cecho:getch()) of
-    unknown -> game_loop(Board);
+    unknown -> draw_world(Board);
     quit    -> teardown_curses();
-    MoveDirection -> game_loop(board:move_player(Board, MoveDirection))
+    MoveDirection -> draw_world(board:move_player(Board, MoveDirection))
   end.
 
 key_bindings($) -> quit;
@@ -31,12 +42,9 @@ teardown_curses() ->
   application:stop(cecho),
   erlang:halt().
 
-redraw_world(Board) ->
-  cecho:erase(),
-  draw_npcs(board:npcs(Board)),
-  draw_player(board:player(Board)),
-  draw_message(board:message(Board)),
-  cecho:refresh().
+close_on_confirm() ->
+  cecho:getch(),
+  teardown_curses().
 
 draw_player({X, Y}) ->
   cecho:mvaddstr(Y, X, "@").
@@ -48,4 +56,15 @@ draw_npcs([{X, Y, Char} | NPCs]) ->
 
 draw_message(Message) ->
   cecho:mvaddstr(23, 0, Message).
+
+draw_win() ->
+  cecho:mvaddstr(11, 33, "You won the game").
+
+draw_loss() ->
+  cecho:mvaddstr(11, 32, "You lost the game").
+
+check_game_end(Board)    -> check_game_end(board:state(Board), Board).
+check_game_end(won,  _)  -> close_on_confirm();
+check_game_end(lost, _)  -> close_on_confirm();
+check_game_end(_, Board) -> game_loop(Board).
 

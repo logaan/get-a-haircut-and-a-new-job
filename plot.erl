@@ -2,7 +2,6 @@
 -export([advance/3]).
 -include_lib("eunit/include/eunit.hrl").
 
-% advance(State, SpeakingTo, NPCs) -> {NewState, Message, NewNPCs}
 advance(got_job, $D, NPCs) ->
   {NewState, Message} = speak(got_job, $D),
   {NewState, Message, kill_dealer(NPCs)};
@@ -18,7 +17,6 @@ kill_dealer(NPCs) ->
 revive_dealer(NPCs) ->
   NPCs ++ [{3,3,$D}].
 
-% speak(State, SpeakingTo) -> {NewState, Message}
 speak(start, $D) -> {got_cash, "You're out? Aight. Here's yo lettuice."};
 speak(start, $M) -> {start, "You worthless piece of shit. Get out of here."};
 speak(start, $G) -> {start, "That Tyrone is lookin' pretty fly wit his new do."};
