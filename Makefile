@@ -10,3 +10,5 @@ compile:
 clean:
 	rm *.dump
 	rm *.beam
+fixterm:
+	stty cooked
